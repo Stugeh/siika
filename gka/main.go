@@ -14,14 +14,15 @@ func readFile(filepath string) string {
 
 	if err != nil {
 		println(err.Error())
+		println(filepath)
 		return ""
 	}
 
-	return string(content[:])
+	return string(content)
 }
 
 func run(source string) {
-	tokens := parser.Lexer(source)
+	tokens := parser.ScanTokens(source)
 	for _, token := range tokens {
 		println(token.Value)
 	}
@@ -54,7 +55,7 @@ func main() {
 	}
 
 	if len(args) == 2 {
-		content := readFile(args[0])
+		content := readFile(args[1])
 
 		if len(content) == 0 {
 			println("failed to read input file")
@@ -62,7 +63,8 @@ func main() {
 		}
 
 		run(content)
+	} else {
+		runPrompt()
 	}
 
-	runPrompt()
 }
