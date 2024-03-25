@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"gka.com/parser"
 )
 
 func readFile(filepath string) string {
@@ -18,8 +20,11 @@ func readFile(filepath string) string {
 	return string(content[:])
 }
 
-func run(content string) {
-	panic("unimplemented")
+func run(source string) {
+	tokens := parser.Lexer(source)
+	for _, token := range tokens {
+		println(token.Value)
+	}
 }
 
 func runPrompt() {
