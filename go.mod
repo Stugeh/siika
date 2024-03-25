@@ -1,3 +1,3 @@
-module siika.com/m
+module siika.com
 
 go 1.22.1
