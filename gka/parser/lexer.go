@@ -10,20 +10,70 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 	lexeme := []rune{source[*start]}
 
 	switch lexeme[0] {
-	case '(', ')', '{', '}', ',', '.', '-', '+', ';', '*':
-		*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
+	// *** SINGLE CHAR LEXEMES
+	case '(':
+		*tokens = append(*tokens, CreateToken(LEFT_PAREN, lexeme, "", *lineNumber))
+	case ')':
+		*tokens = append(*tokens, CreateToken(RIGHT_PAREN, lexeme, "", *lineNumber))
+	case '{':
+		*tokens = append(*tokens, CreateToken(LEFT_BRACE, lexeme, "", *lineNumber))
+	case '}':
+		*tokens = append(*tokens, CreateToken(RIGHT_BRACE, lexeme, "", *lineNumber))
+	case ',':
+		*tokens = append(*tokens, CreateToken(COMMA, lexeme, "", *lineNumber))
+	case '.':
+		*tokens = append(*tokens, CreateToken(DOT, lexeme, "", *lineNumber))
 
-	case '!', '=', '<', '>':
+	case '-':
+		*tokens = append(*tokens, CreateToken(MINUS, lexeme, "", *lineNumber))
+	case '+':
+		*tokens = append(*tokens, CreateToken(PLUS, lexeme, "", *lineNumber))
+	case ';':
+		*tokens = append(*tokens, CreateToken(SEMICOLON, lexeme, "", *lineNumber))
+	case '*':
+		*tokens = append(*tokens, CreateToken(STAR, lexeme, "", *lineNumber))
+
+	// Lexemes that potentially contain more than one char
+	case '!':
 		if charAtIndexEq(*current+1, source, "=") {
 			lexeme = append(lexeme, '=')
-			*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
+			*tokens = append(*tokens, CreateToken(BANG_EQUAL, lexeme, "", *lineNumber))
 			*current++
 		} else {
-			*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
+			*tokens = append(*tokens, CreateToken(BANG, lexeme, "", *lineNumber))
+		}
+	case '=':
+		if charAtIndexEq(*current+1, source, "=") {
+			lexeme = append(lexeme, '=')
+			*tokens = append(*tokens, CreateToken(EQUAL_EQUAL, lexeme, "", *lineNumber))
+			*current++
+		} else {
+			*tokens = append(*tokens, CreateToken(EQUAL, lexeme, "", *lineNumber))
+		}
+	case '<':
+		if charAtIndexEq(*current+1, source, "=") {
+			lexeme = append(lexeme, '=')
+			*tokens = append(*tokens, CreateToken(LESS_EQUAL, lexeme, "", *lineNumber))
+			*current++
+		} else {
+			*tokens = append(*tokens, CreateToken(LESS, lexeme, "", *lineNumber))
+
 		}
 
+	case '>':
+		if charAtIndexEq(*current+1, source, "=") {
+			lexeme = append(lexeme, '=')
+			*tokens = append(*tokens, CreateToken(GREATER_EQUAL, lexeme, "", *lineNumber))
+			*current++
+		} else {
+			*tokens = append(*tokens, CreateToken(GREATER, lexeme, "", *lineNumber))
+
+		}
+
+	// Slash
 	case '/':
 		if charAtIndexEq(*current+1, source, "/") {
+			// Ignore comments until end of line
 			for *current < len(source) && source[*current] != '\n' {
 				*current++
 			}
@@ -32,49 +82,17 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 			*tokens = append(*tokens, CreateToken(SLASH, lexeme, "", *lineNumber))
 		}
 
+	// ignore whitespace
 	case ' ', '\r', '\t':
 
 	case '\n':
 		*lineNumber++
 
 	default:
+
 		logger.Error(*lineNumber, "Unexpected character."+string(lexeme))
 	}
-}
 
-func getTokenType(char rune) TokenType {
-	switch char {
-	case '(':
-		return LEFT_PAREN
-	case ')':
-		return RIGHT_PAREN
-	case '{':
-		return LEFT_BRACE
-	case '}':
-		return RIGHT_BRACE
-	case ',':
-		return COMMA
-	case '.':
-		return DOT
-	case '-':
-		return MINUS
-	case '+':
-		return PLUS
-	case ';':
-		return SEMICOLON
-	case '*':
-		return STAR
-	case '!':
-		return BANG
-	case '=':
-		return EQUAL
-	case '<':
-		return LESS
-	case '>':
-		return GREATER
-	default:
-		return UNKNOWN
-	}
 }
 
 func ScanSource(source []rune) []Token {
