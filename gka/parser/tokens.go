@@ -116,19 +116,6 @@ func (token Token) String() string {
 	return fmt.Sprintf("%s %s %s", token.Type, token.Lexeme, token.Literal)
 }
 
-func CreateToken(tokenType TokenType, lexeme string, args ...interface{}) Token {
-	token := Token{Type: tokenType, Lexeme: lexeme}
-
-	// Set additional arguments if provided
-	if len(args) > 0 {
-		if literal, ok := args[0].(string); ok {
-			token.Literal = literal
-		}
-
-		if line, ok := args[1].(int); ok {
-			token.Line = line
-		}
-	}
-
-	return token
+func CreateToken(tokenType TokenType, lexeme string, literal string, lineNumber int) Token {
+	return Token{Type: tokenType, Lexeme: lexeme, Literal: literal, Line: lineNumber}
 }

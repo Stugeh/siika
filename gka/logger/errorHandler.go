@@ -2,7 +2,7 @@ package logger
 
 import "fmt"
 
-func error(lineNumber int, message string) {
+func Error(lineNumber int, message string) {
 	report(lineNumber, "", message)
 }
 
