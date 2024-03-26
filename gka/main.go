@@ -8,24 +8,25 @@ import (
 	"gka.com/parser"
 )
 
-func readFile(filepath string) string {
+func runFile(filepath string) error {
 	println("Running file: " + filepath)
 	content, err := os.ReadFile(filepath)
 
 	if err != nil {
 		println(err.Error())
 		println(filepath)
-		return ""
+		panic("Failed to read file. Exiting.")
 	}
 
-	return string(content)
+	return run(string(content))
 }
 
-func run(source string) {
-	tokens := parser.ScanTokens(source)
+func run(source string) error {
+	tokens := parser.ScanSource(source)
 	for _, token := range tokens {
-		println(token.Value)
+		println(token.String())
 	}
+	return nil
 }
 
 func runPrompt() {
@@ -34,16 +35,17 @@ func runPrompt() {
 	for {
 		fmt.Print("> ")
 		line, err := reader.ReadString('\n')
+
 		if err != nil || line == "" {
+			println("Couldn't read string or it was empty.")
 			continue
 		}
 
-		content := readFile(line)
+		error := run(line)
 
-		if len(content) > 0 {
-			break
+		if error != nil {
+			println(error.Error())
 		}
-
 	}
 }
 
@@ -55,14 +57,8 @@ func main() {
 	}
 
 	if len(args) == 2 {
-		content := readFile(args[1])
+		runFile(args[1])
 
-		if len(content) == 0 {
-			println("failed to read input file")
-			return
-		}
-
-		run(content)
 	} else {
 		runPrompt()
 	}
