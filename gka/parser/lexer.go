@@ -1,6 +1,10 @@
 package parser
 
-import "gka.com/logger"
+import (
+	"unicode"
+
+	"gka.com/logger"
+)
 
 func charAtIndexEq(idx int, source []rune, cmp string) bool {
 	return string(source[idx]) == cmp
@@ -8,6 +12,8 @@ func charAtIndexEq(idx int, source []rune, cmp string) bool {
 
 func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens *[]Token) {
 	lexeme := []rune{source[*start]}
+	println("Scanning token:")
+	println(string(source[*current]))
 
 	switch lexeme[0] {
 	// *** SINGLE CHAR LEXEMES
@@ -90,19 +96,39 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 
 	// Strings
 	case '"':
+		lexeme = lexeme[1:] // Slice off opening quote
+
 		*current++
 		for *current < len(source) && source[*current] != '\n' && source[*current] != '"' {
 			lexeme = append(lexeme, source[*current])
 			*current++
 		}
+
 		if *current >= len(source) || source[*current] != '"' {
 			logger.Error(*lineNumber, "Unterminated string literal.")
 			break
 		}
-		lexeme = append(lexeme, source[*current]) // Include the closing quote
+
 		*tokens = append(*tokens, CreateToken(STRING, lexeme, "", *lineNumber))
 
 	default:
+		if unicode.IsDigit(source[*current]) {
+			for *current < len(source) && unicode.IsDigit(source[*current]) {
+				*current++
+			}
+
+			if *current < len(source) && source[*current] == '.' && unicode.IsDigit(source[*current+1]) {
+				*current++ // Consume the "."
+
+				for *current < len(source) && unicode.IsDigit(source[*current+1]) {
+					*current++
+				}
+			}
+
+			*tokens = append(*tokens, CreateToken(NUMBER, source[*start:*current+1], "", *lineNumber))
+
+			return
+		}
 
 		logger.Error(*lineNumber, "Unexpected character."+string(lexeme))
 	}
