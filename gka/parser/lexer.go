@@ -88,6 +88,20 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 	case '\n':
 		*lineNumber++
 
+	// Strings
+	case '"':
+		*current++
+		for *current < len(source) && source[*current] != '\n' && source[*current] != '"' {
+			lexeme = append(lexeme, source[*current])
+			*current++
+		}
+		if *current >= len(source) || source[*current] != '"' {
+			logger.Error(*lineNumber, "Unterminated string literal.")
+			break
+		}
+		lexeme = append(lexeme, source[*current]) // Include the closing quote
+		*tokens = append(*tokens, CreateToken(STRING, lexeme, "", *lineNumber))
+
 	default:
 
 		logger.Error(*lineNumber, "Unexpected character."+string(lexeme))
