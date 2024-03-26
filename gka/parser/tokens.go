@@ -51,6 +51,8 @@ const (
 	VAR
 	WHILE
 	EOF
+
+	UNKNOWN
 )
 
 var tokenTypeNames = map[TokenType]string{
@@ -97,7 +99,7 @@ var tokenTypeNames = map[TokenType]string{
 
 type Token struct {
 	Type    TokenType
-	Lexeme  string
+	Lexeme  []rune
 	Literal string
 	Line    int
 }
@@ -113,9 +115,9 @@ func (tokenType TokenType) String() string {
 }
 
 func (token Token) String() string {
-	return fmt.Sprintf("%s %s %s", token.Type, token.Lexeme, token.Literal)
+	return fmt.Sprintf("%d %s %s %s", token.Line, token.Type, string(token.Lexeme), token.Literal)
 }
 
-func CreateToken(tokenType TokenType, lexeme string, literal string, lineNumber int) Token {
+func CreateToken(tokenType TokenType, lexeme []rune, literal string, lineNumber int) Token {
 	return Token{Type: tokenType, Lexeme: lexeme, Literal: literal, Line: lineNumber}
 }

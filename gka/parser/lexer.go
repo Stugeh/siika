@@ -2,98 +2,89 @@ package parser
 
 import "gka.com/logger"
 
-func charAtIndexEq(idx int, source string, cmp string) bool {
+func charAtIndexEq(idx int, source []rune, cmp string) bool {
 	return string(source[idx]) == cmp
 }
 
-func scanToken(start *int, current *int, lineNumber int, source string, tokens *[]Token) {
-	lexeme := string(source[*start])
+func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens *[]Token) {
+	lexeme := []rune{source[*start]}
 
-	switch lexeme {
-	// *** SINGLE CHAR LEXEMES
-	case "(":
-		*tokens = append(*tokens, CreateToken(LEFT_PAREN, lexeme, "", lineNumber))
-	case ")":
-		*tokens = append(*tokens, CreateToken(RIGHT_PAREN, lexeme, "", lineNumber))
-	case "{":
-		*tokens = append(*tokens, CreateToken(LEFT_BRACE, lexeme, "", lineNumber))
-	case "}":
-		*tokens = append(*tokens, CreateToken(RIGHT_BRACE, lexeme, "", lineNumber))
-	case ",":
-		*tokens = append(*tokens, CreateToken(COMMA, lexeme, "", lineNumber))
-	case ".":
-		*tokens = append(*tokens, CreateToken(DOT, lexeme, "", lineNumber))
+	switch lexeme[0] {
+	case '(', ')', '{', '}', ',', '.', '-', '+', ';', '*':
+		*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
 
-	case "-":
-		*tokens = append(*tokens, CreateToken(MINUS, lexeme, "", lineNumber))
-	case "+":
-		*tokens = append(*tokens, CreateToken(PLUS, lexeme, "", lineNumber))
-	case ";":
-		*tokens = append(*tokens, CreateToken(SEMICOLON, lexeme, "", lineNumber))
-	case "*":
-		*tokens = append(*tokens, CreateToken(STAR, lexeme, "", lineNumber))
-
-	// Lexemes that potentially contain more than one char
-	case "!":
+	case '!', '=', '<', '>':
 		if charAtIndexEq(*current+1, source, "=") {
-			*tokens = append(*tokens, CreateToken(BANG_EQUAL, "!=", "", lineNumber))
+			lexeme = append(lexeme, '=')
+			*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
 			*current++
 		} else {
-			*tokens = append(*tokens, CreateToken(BANG, "!", "", lineNumber))
-		}
-	case "=":
-		if charAtIndexEq(*current+1, source, "=") {
-			*tokens = append(*tokens, CreateToken(EQUAL_EQUAL, "==", "", lineNumber))
-			*current++
-		} else {
-			*tokens = append(*tokens, CreateToken(EQUAL, "=", "", lineNumber))
-		}
-	case "<":
-		if charAtIndexEq(*current+1, source, "=") {
-			*tokens = append(*tokens, CreateToken(LESS_EQUAL, "<=", "", lineNumber))
-			*current++
-		} else {
-			*tokens = append(*tokens, CreateToken(LESS, "<", "", lineNumber))
-
+			*tokens = append(*tokens, CreateToken(getTokenType(lexeme[0]), lexeme, "", *lineNumber))
 		}
 
-	case ">":
-		if charAtIndexEq(*current+1, source, "=") {
-			*tokens = append(*tokens, CreateToken(GREATER_EQUAL, ">=", "", lineNumber))
-			*current++
-		} else {
-			*tokens = append(*tokens, CreateToken(GREATER, ">", "", lineNumber))
-
-		}
-
-	// Slash
-	case "/":
+	case '/':
 		if charAtIndexEq(*current+1, source, "/") {
-			// Ignore comments until end of line
 			for *current < len(source) && source[*current] != '\n' {
 				*current++
 			}
+			*lineNumber++
 		} else {
-			*tokens = append(*tokens, CreateToken(SLASH, "/", "", lineNumber))
+			*tokens = append(*tokens, CreateToken(SLASH, lexeme, "", *lineNumber))
 		}
 
-	// ignore whitespace
-	case " ", "\r", "\t":
+	case ' ', '\r', '\t':
+
+	case '\n':
+		*lineNumber++
 
 	default:
-		logger.Error(lineNumber, "Unexpected character."+lexeme)
+		logger.Error(*lineNumber, "Unexpected character."+string(lexeme))
 	}
-
 }
 
-func ScanSource(source string) []Token {
+func getTokenType(char rune) TokenType {
+	switch char {
+	case '(':
+		return LEFT_PAREN
+	case ')':
+		return RIGHT_PAREN
+	case '{':
+		return LEFT_BRACE
+	case '}':
+		return RIGHT_BRACE
+	case ',':
+		return COMMA
+	case '.':
+		return DOT
+	case '-':
+		return MINUS
+	case '+':
+		return PLUS
+	case ';':
+		return SEMICOLON
+	case '*':
+		return STAR
+	case '!':
+		return BANG
+	case '=':
+		return EQUAL
+	case '<':
+		return LESS
+	case '>':
+		return GREATER
+	default:
+		return UNKNOWN
+	}
+}
+
+func ScanSource(source []rune) []Token {
 	tokens := []Token{}
 	start, line := 0, 1
 
 	for current := 0; current < len(source); current++ {
 		// Set start of token to current index
 		start = current
-		scanToken(&start, &current, line, source, &tokens)
+		scanToken(&start, &current, &line, source, &tokens)
 	}
 
 	return tokens
