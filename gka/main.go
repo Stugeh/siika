@@ -22,7 +22,7 @@ func runFile(filepath string) error {
 }
 
 func run(source string) error {
-	tokens := parser.ScanSource(source)
+	tokens := parser.ScanSource([]rune(source))
 	for _, token := range tokens {
 		println(token.String())
 	}
