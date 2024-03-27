@@ -120,9 +120,7 @@ var keywords = map[string]TokenType{
 	"while":  WHILE,
 }
 
-type Charray []rune
-
-func (chars Charray) MatchKeyWord(lineNumber int) TokenType {
+func MatchKeyword(chars []rune, lineNumber int) TokenType {
 	tokenType, found := keywords[string(chars)]
 	if !found {
 		logger.Error(lineNumber, "Unknown token:"+string(chars))
@@ -133,7 +131,7 @@ func (chars Charray) MatchKeyWord(lineNumber int) TokenType {
 
 type Token struct {
 	Type    TokenType
-	Lexeme  Charray
+	Lexeme  []rune
 	Literal string
 	Line    int
 }
@@ -152,6 +150,6 @@ func (token Token) String() string {
 	return fmt.Sprintf("%d %s %s %s", token.Line, token.Type, string(token.Lexeme), token.Literal)
 }
 
-func CreateToken(tokenType TokenType, lexeme Charray, literal string, lineNumber int) Token {
+func CreateToken(tokenType TokenType, lexeme []rune, literal string, lineNumber int) Token {
 	return Token{Type: tokenType, Lexeme: lexeme, Literal: literal, Line: lineNumber}
 }
