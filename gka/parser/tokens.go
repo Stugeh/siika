@@ -1,6 +1,10 @@
 package parser
 
-import "fmt"
+import (
+	"fmt"
+
+	"gka.com/logger"
+)
 
 type TokenType int
 
@@ -97,9 +101,39 @@ var tokenTypeNames = map[TokenType]string{
 	EOF:           "EOF",
 }
 
+var keywords = map[string]TokenType{
+	"and":    AND,
+	"class":  CLASS,
+	"else":   ELSE,
+	"false":  FALSE,
+	"for":    FOR,
+	"fn":     FUN,
+	"if":     IF,
+	"nil":    NIL,
+	"or":     OR,
+	"print":  PRINT,
+	"return": RETURN,
+	"super":  SUPER,
+	"this":   THIS,
+	"true":   TRUE,
+	"var":    VAR,
+	"while":  WHILE,
+}
+
+type Charray []rune
+
+func (chars Charray) MatchKeyWord(lineNumber int) TokenType {
+	tokenType, found := keywords[string(chars)]
+	if !found {
+		logger.Error(lineNumber, "Unknown token:"+string(chars))
+		return UNKNOWN
+	}
+	return tokenType
+}
+
 type Token struct {
 	Type    TokenType
-	Lexeme  []rune
+	Lexeme  Charray
 	Literal string
 	Line    int
 }
@@ -118,6 +152,6 @@ func (token Token) String() string {
 	return fmt.Sprintf("%d %s %s %s", token.Line, token.Type, string(token.Lexeme), token.Literal)
 }
 
-func CreateToken(tokenType TokenType, lexeme []rune, literal string, lineNumber int) Token {
+func CreateToken(tokenType TokenType, lexeme Charray, literal string, lineNumber int) Token {
 	return Token{Type: tokenType, Lexeme: lexeme, Literal: literal, Line: lineNumber}
 }
