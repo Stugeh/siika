@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"unicode"
-
 	"gka.com/logger"
 )
 
@@ -12,8 +10,6 @@ func charAtIndexEq(idx int, source []rune, cmp string) bool {
 
 func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens *[]Token) {
 	lexeme := []rune{source[*start]}
-	println("Scanning token:")
-	println(string(source[*current]))
 
 	switch lexeme[0] {
 	// *** SINGLE CHAR LEXEMES
@@ -111,21 +107,45 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 
 		*tokens = append(*tokens, CreateToken(STRING, lexeme, "", *lineNumber))
 
+	// Key words
+	case 'o':
+		if source[*current+1] == 'r' {
+			*current++
+			*tokens = append(*tokens, CreateToken(OR, source[*start:*current], "", *lineNumber))
+		}
+
 	default:
-		if unicode.IsDigit(source[*current]) {
-			for *current < len(source) && unicode.IsDigit(source[*current]) {
+		// handle numbers
+		// TODO make logic less shit
+		if isDigit(source[*current]) {
+			*current++
+			for *current < len(source) && isDigit(source[*current]) {
 				*current++
 			}
 
-			if *current < len(source) && source[*current] == '.' && unicode.IsDigit(source[*current+1]) {
-				*current++ // Consume the "."
-
-				for *current < len(source) && unicode.IsDigit(source[*current+1]) {
+			// handle floating point nums
+			if *current < len(source) && source[*current] == '.' && isDigit(source[*current+1]) {
+				for *current < len(source) && isDigit(source[*current+1]) {
 					*current++
 				}
+				*tokens = append(*tokens, CreateToken(NUMBER, source[*start:*current+1], "", *lineNumber))
+			} else {
+				*current--
+				*tokens = append(*tokens, CreateToken(NUMBER, source[*start:*current+1], "", *lineNumber))
 			}
 
-			*tokens = append(*tokens, CreateToken(NUMBER, source[*start:*current+1], "", *lineNumber))
+			return
+
+		} else if isAlpha(source[*current]) { // Handle key words
+			for isAlphaNumeric(source[*current+1]) {
+				*current++
+			}
+
+			tokenType := MatchKeyword(source[*start:*current+1], *lineNumber)
+			if tokenType == UNKNOWN {
+				return
+			}
+			*tokens = append(*tokens, CreateToken(tokenType, source[*start:*current+1], "", *lineNumber))
 
 			return
 		}
@@ -146,4 +166,17 @@ func ScanSource(source []rune) []Token {
 	}
 
 	return tokens
+}
+
+// ** Helper methods **//
+// Simpler than unicode.IsDigit()
+func isDigit(char rune) bool {
+	return char >= '0' && char <= '9'
+}
+func isAlpha(char rune) bool {
+	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char == '_'
+}
+
+func isAlphaNumeric(char rune) bool {
+	return isAlpha(char) || isDigit(char)
 }
