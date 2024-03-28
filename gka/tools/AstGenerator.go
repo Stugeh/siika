@@ -22,7 +22,7 @@ func defineAst(fileName string, types []string) {
 	buf.WriteString("package ast\n\n")
 	buf.WriteString("import . \"gka.com/front-end\"\n\n")
 
-	buf.WriteString("type " + fileName + " interface {\n Print()string\n" + strings.ToLower(fileName) + "Node()}\n\n")
+	buf.WriteString("type " + fileName + " interface {\n Print()[]rune\n" + strings.ToLower(fileName) + "Node()}\n\n")
 
 	buf.WriteString("type (\n")
 
