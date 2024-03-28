@@ -5,7 +5,7 @@ package ast
 import . "gka.com/front-end"
 
 type Expr interface {
-	Print() string
+	Print() []rune
 	exprNode()
 }
 

@@ -5,7 +5,7 @@ package ast
 import . "gka.com/front-end"
 
 type Stmt interface {
-	Print() string
+	Print() []rune
 	stmtNode()
 }
 
