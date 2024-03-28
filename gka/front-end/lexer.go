@@ -114,10 +114,9 @@ func scanToken(start *int, current *int, lineNumber *int, source []rune, tokens 
 			*tokens = append(*tokens, CreateToken(OR, source[*start:*current], "", *lineNumber))
 		}
 
+	// TODO make logic less shit
 	default:
-		// handle numbers
-		// TODO make logic less shit
-		if isDigit(source[*current]) {
+		if isDigit(source[*current]) { // handle numbers
 			*current++
 			for *current < len(source) && isDigit(source[*current]) {
 				*current++
@@ -173,6 +172,7 @@ func ScanSource(source []rune) []Token {
 func isDigit(char rune) bool {
 	return char >= '0' && char <= '9'
 }
+
 func isAlpha(char rune) bool {
 	return (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || char == '_'
 }

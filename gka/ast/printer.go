@@ -1,5 +1,8 @@
 package ast
 
+// *** HELPER FUNCTIONS *** //
+
+// Used for expressions exclusively
 func parenWrap(operator []rune, exprs ...Expr) []rune {
 	runes := append([]rune{'('}, operator...)
 
@@ -9,6 +12,7 @@ func parenWrap(operator []rune, exprs ...Expr) []rune {
 	return append(runes, ')')
 }
 
+// Used when we need to wrap statements, expressions and rune slices
 func parenWrap2(operator []rune, parts ...interface{}) []rune {
 	runes := append([]rune{'('}, operator...)
 
@@ -25,7 +29,7 @@ func parenWrap2(operator []rune, parts ...interface{}) []rune {
 	return append(runes, ')')
 }
 
-// *** EXPRESSIONS *** //
+// *** EXPRESSION PRINT HELPERS  *** //
 func (expr *AssignExpr) Print() []rune {
 	return parenWrap2([]rune{'='}, expr.Name.Lexeme, expr.Value)
 }
@@ -78,7 +82,7 @@ func (expr *VariableExpr) Print() []rune {
 	return expr.Name.Lexeme
 }
 
-// *** STATEMENTS *** //
+// *** STATEMENT PRINT HELPERS *** //
 func (stmt *BlockStmt) Print() []rune {
 	return parenWrap2([]rune("block"), stmt.Statements)
 }

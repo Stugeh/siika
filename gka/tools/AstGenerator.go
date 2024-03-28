@@ -1,3 +1,4 @@
+// Generates the AST node definitions in the ast package
 package tools
 
 import (
