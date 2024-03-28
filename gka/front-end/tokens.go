@@ -1,8 +1,7 @@
-package parser
+package frontend
 
 import (
 	"fmt"
-
 	"gka.com/logger"
 )
 
