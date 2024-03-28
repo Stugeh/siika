@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 
-	"gka.com/parser"
+	"gka.com/front-end"
+	"gka.com/tools"
 )
 
 func runFile(filepath string) error {
@@ -22,7 +24,7 @@ func runFile(filepath string) error {
 }
 
 func run(source string) error {
-	tokens := parser.ScanSource([]rune(source))
+	tokens := frontend.ScanSource([]rune(source))
 	for _, token := range tokens {
 		println(token.String())
 	}
@@ -50,7 +52,18 @@ func runPrompt() {
 }
 
 func main() {
-	args := os.Args
+	var generateGrammar bool
+	flag.BoolVar(&generateGrammar, "gen-grammar", false, "Generate grammar")
+	flag.Parse()
+
+	args := flag.Args()
+
+	if generateGrammar {
+		tools.GenerateGrammarFiles()
+		return
+	}
+
+	args = os.Args
 	if len(args) > 2 {
 		println("Usage: gka [script]")
 		panic("Too many args")
